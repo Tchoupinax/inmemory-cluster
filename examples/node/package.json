@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "redis": "5.5.6"
+  },
+  "devDependencies": {
+    "@types/redis": "4.0.11"
+  }
+}

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>👾 InMemory Cluster</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50 text-gray-900 p-8">
+    <h1 class="text-3xl font-bold mb-6">🔗 Connected Peers and Values</h1>
+    <div class="grid grid-cols-2 gap-8">
+
+        <div>
+            <h2 class="text-xl font-semibold mb-2">Peers</h2>
+            <div class="overflow-x-auto">
+                <table class="table-auto w-full bg-white shadow-md rounded-lg">
+                    <thead>
+                        <tr class="bg-gray-200 text-left">
+                            <th class="p-2">Peer ID</th>
+                            <th class="p-2">Address</th>
+                        </tr>
+                    </thead>
+                    <tbody id="peer-table">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <h2 class="text-xl font-semibold">📊 Peer Statistics</h2>
+            <div id="stats-table" class="overflow-x-auto mt-4">
+                <table class="table-auto w-full bg-white shadow-md rounded-lg">
+                    <thead>
+                        <tr class="bg-gray-200 text-left">
+                            <th class="p-2">Peer ID</th>
+                            <th class="p-2">Memory Usage</th>
+                            <th class="p-2">Key Count</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-body">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <div>
+            <h2 class="text-xl font-semibold mb-2">
+                Values <span class="text-gray-500 text-sm">(x total)</span>
+            </h2>
+            <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
+                <table class="table-auto w-full bg-white shadow-md rounded-lg">
+                    <thead>
+                        <tr class="bg-gray-200 text-left">
+                            <th class="p-2">Key</th>
+                            <th class="p-2">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="value-table">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        async function fetchPeers() {
+            {
+                const res = await fetch('/peers');
+                const table = await res.text();
+                document.getElementById('peer-table').innerHTML = table;
+            }
+        }
+
+        async function fetchValues() {
+            {
+                const res = await fetch('/values');
+                const table = await res.text();
+                document.getElementById('value-table').innerHTML = table;
+                // Update count in title too, optionally fetch count separately if needed
+            }
+        }
+
+        async function fetchStats() {
+            {
+                const res = await fetch('/stats');
+                const stats = await res.json();
+
+                const rows = stats.flat().map(stat => `
+            <tr class="border-b">
+            <td class="p-2 font-mono">${stat.peer_id}</td>
+            <td class="p-2 font-mono text-gray-600">${stat.stats.memory_mb.toFixed(2)} MB</td>
+            <td class="p-2 font-mono text-gray-600">${stat?.stats?.key_count}</td>
+            </tr>
+        `).join('');
+
+                document.getElementById('stats-body').innerHTML = rows;
+            }
+        }
+
+        function refresh() {
+            {
+                fetchPeers();
+                fetchValues();
+                fetchStats();
+            }
+        }
+
+        setInterval(refresh, 1000);
+        window.onload = refresh;
+    </script>
+</body>
+
+</html>
